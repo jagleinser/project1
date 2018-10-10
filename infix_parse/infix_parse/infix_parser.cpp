@@ -3,14 +3,58 @@
 
 bool infix_parser::isOperator(char c) {
 	size_t found = OPERATORS.find(c);
-	if (found != std::string::npos)
-		return true;
-	else
-		return false;
+	return found != std::string::npos;
 }
+
+//Validates the expression and tokenizes it.
 void infix_parser::tokenize(string mString, vector<string> &tokens) {
 	for (int i = 0; i < mString.size(); i++)
 	{
+		//Check for errors.
+		try {
+			if (i == 0 && (mString[i] == ')' || mString[i] == ']')) {
+				throw "Expession can't start with a closing parenthesis @ char: ";
+
+			}
+			if (i == 0 && (mString[i] == '&' || mString[i] == '<' || mString[i] == '>' || mString[i] == '^')) {
+				throw "Expression can't start with a binary operator @ char: ";
+			}
+			if (i >= 2) {
+				if (((mString[i] == '&' && mString[i - 1] == '&') || (mString[i] == '|' && mString[i - 1] == '|')) && (mString[i - 2] == '|' || mString[i - 2] == '&')) {
+					throw "Two binary operators in a row @ char: ";
+				}
+				if ((mString[i] == '&' && mString[i - 1] == '|') || mString[i] == '|' && mString[i - 1] == '&') {
+					throw "Two binary operators in a row @ char: ";
+				}
+
+			}
+			if (i >= 2) {
+				if ((mString[i] == '<' || mString[i] == '>' || mString[i] == '&' || mString[i] == '|') && ((mString[i - 1] == '+' && mString[i - 2] == '+') || (mString[i - 1] == '-' && mString[i - 2] == '-'))) {
+					throw "A unary operand can't be followed by a binary operator @ char: ";
+				}
+			}
+			if (i > 1) {
+				if (mString[i - 1] == '/' && mString[i] == '0') {
+					throw "Division by zero @ char: ";
+				}
+
+			}
+			if (i > 2) {
+				if ((mString[i] == '1' || mString[i] == '2' || mString[i] == '3' || mString[i] == '4' || mString[i] == '5' || mString[i] == '6' || mString[i] == '7' || mString[i] == '8' || mString[i] == '9' || mString[i] == '0') && (mString[i - 1] == ' ')
+					&& (mString[i - 2] == '1' || mString[i - 2] == '2' || mString[i - 2] == '3' || mString[i - 2] == '4' || mString[i - 2] == '5' || mString[i - 2] == '6' || mString[i - 2] == '7' || mString[i - 2] == '8' || mString[i - 2] == '9' || mString[i - 2] == '0')) {
+					throw "Two operands in a row @ char: ";
+				}
+			}
+		}
+		//If an error is found, print out where and quit the program.
+		catch (const char* err)
+		{
+			cout << err << i << endl;
+			std::system("pause");
+			exit(0);
+		}
+
+		//Otherwise, tokenize
 		if (isalnum(mString[i]) && !isalnum(mString[i + 1]))
 		{
 			tokens.push_back(mString.substr(i, 1));
@@ -36,6 +80,8 @@ void infix_parser::tokenize(string mString, vector<string> &tokens) {
 
 	}
 }
+
+
 void infix_parser::eval(string expression)
 {
 stack<int> operands;
@@ -157,7 +203,7 @@ while (!operators.empty())
 	operands.push(process(value1, value2, op));
 
 }
-cout << operands.top();
+cout << expression << " = " << operands.top() << endl;
 
 }
 int infix_parser::getPres(string op){ //establishes order of operations
